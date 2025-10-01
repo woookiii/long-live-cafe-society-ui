@@ -1,14 +1,29 @@
 'use client'
 
-import Image from "next/image";//replace <img/>
+import { useAuth } from "@/context/AuthContext";
 import Link from "next/link";
-// import { FaGoogle } from 'react-icons/fa';
+import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { logoutUser } from "@/api/auth";
 
 
 const Navbar = () => {
-  // Simulated login state (replace with real auth logic later)
-  const [isLogin, setIsLogin] = useState(false);
+  const router = useRouter();
+  const { setAccessToken } = useAuth();
+  const [username, setUserName] = useState<string>(localStorage.getItem('name') || '');
+
+  const handleLogout = async () => {
+    try {
+      await logoutUser();
+      setAccessToken(null);
+      setUserName('');
+      localStorage.clear();
+      window.location.reload();
+      router.replace('/');
+    } catch (err: any) {
+      console.log('logout failed: ', err);
+    }
+  }
 
   return (
     <nav className="bg-white shadow py-4 px-6 flex items-center justify-between">
@@ -16,24 +31,37 @@ const Navbar = () => {
         Literature Society
       </Link>
       <div className="flex items-center space-x-4">
-        {!isLogin ? (
-          <button
-            className="flex items-center px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
-            onClick={() => setIsLogin(true)} // Simulate login
-          >
-            Login
-          </button>
+        {!username ? (
+          <>
+            <Link
+              href="/login"
+              className="text-gray-600 hover:text-gray-700 font-medium transition px-3 py-2 leading-none"
+            >
+              Login
+            </Link>
+            <Link
+              href="/register"
+              className="bg-gray-100 hover:bg-gray-200 text-gray-800 font-medium transition px-3 py-2 rounded-md leading-none"
+            >
+              Register
+            </Link>
+          </>
         ) : (
-          <button
-            className="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 transition"
-            onClick={() => setIsLogin(false)}
-          >
-            Logout
-          </button>
+          <>
+            <span className="hidden sm:block text-gray-700 font-md px-2">
+              Welcome, {username}
+            </span>
+            <button
+              onClick={handleLogout}
+              className="text-red-600 hover:text-red-900 font-md trasition px-3 py-2 leading-none"
+            >
+              Logout
+            </button>
+          </>
         )}
       </div>
     </nav>
   )
 }
  
-export default Navbar;//we can embedded this to layout
+export default Navbar;

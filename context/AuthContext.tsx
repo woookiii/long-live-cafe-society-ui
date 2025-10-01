@@ -1,3 +1,5 @@
+'use client'
+
 import { createContext, useContext, useState, useEffect, type ReactNode } from "react";
 import { refreshAccessToken } from "@/api/auth";
 import { setStoredAccessToken } from "@/lib/authToken";
