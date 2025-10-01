@@ -10,8 +10,7 @@ export const registerUser = async({
     password: string;
   }) => {
   try {
-    const res = await api.post('/create', { email, name, password });
-    return res.data;
+    await api.post('/member/create', { email, name, password });
   } catch (err: any) {
     const message = err.response?.data?.message || 'Failed to register'
     throw new Error(message);
@@ -23,11 +22,10 @@ export const loginUser = async (credentials: {
   password: string;
 }) => {
   try {
-    const res = await api.post('/doLogin', credentials);
+    const res = await api.post('/member/doLogin', credentials);
     return res.data;
   } catch (err: any) {
-    const message = err.response?.data?.message || 'Failed to login'
-    throw new Error(message);
+    throw new Error(err.message);
   }
 }
 
@@ -42,7 +40,7 @@ export const logoutUser = async () => {
 
 export const refreshAccessToken = async () => {
   try {
-    const res = await api.post('/refresh-token');
+    const res = await api.post('/member/refresh-token');
     return res.data;
   } catch (err: any) {
     const message = err.response?.data?.message || 'Failed to refresh access token'

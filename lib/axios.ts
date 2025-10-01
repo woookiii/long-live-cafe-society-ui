@@ -24,7 +24,7 @@ api.interceptors.response.use((res) => res,
     if (error.response?.status) {
       const originalRequest = error.config;
 
-      if (error.response?.status === 401 && !originalRequest._retry && !originalRequest.url.incluedes('/refresh-token')) {
+      if (error.response?.status === 401 && !originalRequest._retry && !originalRequest.url.includes('/refresh-token')) {
         originalRequest._retry = true;        
         try {
           const { accessToken: newToken } = await refreshAccessToken();

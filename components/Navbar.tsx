@@ -3,20 +3,26 @@
 import { useAuth } from "@/context/AuthContext";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { logoutUser } from "@/api/auth";
 
 
 const Navbar = () => {
   const router = useRouter();
-  const { setAccessToken } = useAuth();
-  const [username, setUserName] = useState<string>(localStorage.getItem('name') || '');
+  const { accessToken, setAccessToken } = useAuth();
+  const [username, setUsername] = useState<string>('');
+
+  useEffect(() => {
+    if (accessToken) {
+      setUsername(localStorage.getItem('username') || '');
+    }
+  }, [accessToken]);
 
   const handleLogout = async () => {
     try {
       await logoutUser();
       setAccessToken(null);
-      setUserName('');
+      setUsername('');
       localStorage.clear();
       window.location.reload();
       router.replace('/');
