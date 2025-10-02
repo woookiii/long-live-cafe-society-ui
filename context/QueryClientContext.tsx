@@ -1,14 +1,11 @@
 'use client'
 
-import LoadingPage from './loading'
+import LoadingPage from '@/app/loading';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { ReactNode, Suspense } from 'react'
 
-interface ProvidersProps {
-  children: ReactNode
-}
 
-export default function Providers({ children }: ProvidersProps) {
+export default function QProvider({ children }: { children: ReactNode }) {
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: {
