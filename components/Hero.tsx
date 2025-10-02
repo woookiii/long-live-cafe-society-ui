@@ -7,9 +7,9 @@ const Hero = () => {
         <h1 className="text-4xl md:text-5xl font-extrabold mb-4 text-gray-900">
           Welcome to 
         </h1>
-        <span className="text-4xl md:text-5xl font-extrabold mb-4 text-blue-600">Literature Society</span>
+        <span className="text-4xl md:text-5xl font-extrabold mb-4 text-blue-600">literature Society</span>
         <p className="text-lg md:text-xl text-gray-700 mt-6 mb-8">
-          Discover, discuss, and share your love for literature, poetry.
+          Discover, discuss, and share your love for literature, movie, and painting
         </p>
         <Link
           href="/talks"

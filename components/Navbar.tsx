@@ -9,14 +9,7 @@ import { logoutUser } from "@/api/auth";
 
 const Navbar = () => {
   const router = useRouter();
-  const { accessToken, setAccessToken } = useAuth();
-  const [username, setUsername] = useState<string>('');
-
-  useEffect(() => {
-    if (accessToken) {
-      setUsername(localStorage.getItem('username') || '');
-    }
-  }, [accessToken]);
+  const { setAccessToken, username, setUsername } = useAuth();
 
   const handleLogout = async () => {
     try {
@@ -24,7 +17,6 @@ const Navbar = () => {
       setAccessToken(null);
       setUsername('');
       localStorage.clear();
-      window.location.reload();
       router.replace('/');
     } catch (err: any) {
       console.log('logout failed: ', err);

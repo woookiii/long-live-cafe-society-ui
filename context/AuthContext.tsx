@@ -7,17 +7,22 @@ import { setStoredAccessToken } from "@/lib/authToken";
 type AuthContextType = {
   accessToken: string | null;
   setAccessToken: (accessToken: string | null) => void;
+  username: string | null;
+  setUsername: (username: string | null) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [accessToken, setAccessToken] = useState<string | null>(null);
+  const [username, setUsername] = useState<string | null>(null);
+
 
   useEffect(() => {
     const loadAuth = async () => {
       try {
-        const { accessToken: newToken } = await refreshAccessToken();
+        const { token: newToken } = await refreshAccessToken();
+        setUsername(localStorage.getItem('username') || '');
         setAccessToken(newToken);
         setStoredAccessToken(newToken);
       } catch (err: any) {
@@ -32,7 +37,7 @@ const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, [accessToken]);
   
   return (
-    <AuthContext.Provider value={{ accessToken, setAccessToken }}>
+    <AuthContext.Provider value={{ accessToken, setAccessToken, username, setUsername }}>
       {children}
     </AuthContext.Provider>
   )

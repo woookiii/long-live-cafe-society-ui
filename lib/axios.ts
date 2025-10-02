@@ -27,7 +27,7 @@ api.interceptors.response.use((res) => res,
       if (error.response?.status === 401 && !originalRequest._retry && !originalRequest.url.includes('/refresh-token')) {
         originalRequest._retry = true;        
         try {
-          const { accessToken: newToken } = await refreshAccessToken();
+          const { token: newToken } = await refreshAccessToken();
           setStoredAccessToken(newToken);
           originalRequest.headers.Authorization = `Bearer ${newToken}`
           return api(originalRequest);

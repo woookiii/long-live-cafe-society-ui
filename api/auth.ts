@@ -31,7 +31,7 @@ export const loginUser = async (credentials: {
 
 export const logoutUser = async () => {
   try {
-    await api.post('/doLogout');
+    await api.post('/member/doLogout');
   } catch (err: any) {
     const message = err.response?.data?.message || 'Failed to logout'
     throw new Error(message);
