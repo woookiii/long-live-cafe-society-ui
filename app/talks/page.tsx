@@ -7,13 +7,19 @@ import api from "@/lib/axios";
 type ChatRoom = {
   roomId: string;
   roomName: string;
-  // add other properties if needed
+  category: string;
+  imageUrl: string;
+  description: string;
 };
 
 export default function GroupChattingList() {
   const [chatRoomList, setChatRoomList] = useState<ChatRoom[]>([]);
   const [showCreateRoomModal, setShowCreateRoomModal] = useState(false);
   const [newRoomTitle, setNewRoomTitle] = useState("");
+  const [newRoomDescription, setNewRoomDescription] = useState("");
+  const [newRoomImageUrl, setNewRoomImageUrl] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState<string>("all");
+  const [newRoomCategory, setNewRoomCategory] = useState<string>("");
   const router = useRouter();
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
@@ -33,13 +39,32 @@ export default function GroupChattingList() {
 
   const createChatRoom = async () => {
     await api.post(
-      `${API_BASE_URL}/chat/room/group/create?roomName=${encodeURIComponent(newRoomTitle)}`,
-      null
+      `${API_BASE_URL}/chat/room/group/create`,
+      {
+        roomName: newRoomTitle,
+        description: newRoomDescription,
+        imageUrl: newRoomImageUrl,
+        category: newRoomCategory,
+      }
     );
     setShowCreateRoomModal(false);
     setNewRoomTitle("");
+    setNewRoomDescription("");
+    setNewRoomImageUrl("");
+    setNewRoomCategory("");
     loadChatRooms();
   };
+
+  // Get unique categories from chatRoomList
+  const categories = [
+    "all",
+    ...Array.from(new Set(chatRoomList.map((room) => room.category)))
+  ];
+
+  // Filtered chat rooms
+  const filteredChatRooms = selectedCategory === "all"
+    ? chatRoomList
+    : chatRoomList.filter((room) => room.category === selectedCategory);
 
   return (
     <div className="container mx-auto py-10">
@@ -53,23 +78,46 @@ export default function GroupChattingList() {
             Create Chat Room
           </button>
         </div>
+        {/* Category Filter */}
+        <div className="px-6 pt-4 pb-2">
+          <label className="mr-2 font-medium">Category:</label>
+          <select
+            className="border rounded px-2 py-1"
+            value={selectedCategory}
+            onChange={(e) => setSelectedCategory(e.target.value)}
+          >
+            {categories.map((cat) => (
+              <option key={cat} value={cat}>{cat}</option>
+            ))}
+          </select>
+        </div>
         <div className="p-6">
           <table className="min-w-full border">
             <thead>
               <tr className="bg-gray-100">
-                <th className="py-2 px-4 border">Room Number</th>
-                <th className="py-2 px-4 border">Room Name</th>
+                <th className="py-2 px-4 border text-left">Room Name</th>
                 <th className="py-2 px-4 border">Chat</th>
               </tr>
             </thead>
             <tbody>
-              {chatRoomList.map((chat) => (
+              {filteredChatRooms.map((chat) => (
                 <tr key={chat.roomId}>
-                  <td className="py-2 px-4 border text-center">{chat.roomId}</td>
-                  <td className="py-2 px-4 border">{chat.roomName}</td>
-                  <td className="py-2 px-4 border text-center">
+                  <td className="py-2 px-4 border align-top">
+                    <div className="flex items-start">
+                      <img
+                        src={chat.imageUrl}
+                        alt={chat.roomName}
+                        className="w-12 h-12 rounded object-cover mr-4 mt-1"
+                      />
+                      <div className="flex flex-col min-w-0">
+                        <span className="font-medium truncate max-w-xs block text-base">{chat.roomName}</span>
+                        <span className="text-gray-500 text-sm truncate max-w-xs block mt-1">{chat.description}</span>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="py-2 px-4 border text-center align-top">
                     <button
-                      className="bg-blue-500 text-white px-3 py-1 rounded"
+                      className="bg-blue-500 text-white px-3 py-1 rounded mt-2"
                       onClick={() => joinChatRoom(chat.roomId)}
                     >
                       join
@@ -77,9 +125,9 @@ export default function GroupChattingList() {
                   </td>
                 </tr>
               ))}
-              {chatRoomList.length === 0 && (
+              {filteredChatRooms.length === 0 && (
                 <tr>
-                  <td colSpan={3} className="py-4 text-center text-gray-400">
+                  <td colSpan={2} className="py-4 text-center text-gray-400">
                     No chat rooms found.
                   </td>
                 </tr>
@@ -103,6 +151,31 @@ export default function GroupChattingList() {
                 value={newRoomTitle}
                 onChange={(e) => setNewRoomTitle(e.target.value)}
               />
+              <textarea
+                className="w-full border rounded px-3 py-2 mb-4"
+                placeholder="Description"
+                value={newRoomDescription}
+                onChange={(e) => setNewRoomDescription(e.target.value)}
+                rows={3}
+              />
+              <input
+                className="w-full border rounded px-3 py-2 mb-4"
+                placeholder="Image URL"
+                value={newRoomImageUrl}
+                onChange={(e) => setNewRoomImageUrl(e.target.value)}
+              />
+              <select
+                className="w-full border rounded px-3 py-2 mb-4"
+                value={newRoomCategory}
+                onChange={(e) => setNewRoomCategory(e.target.value)}
+              >
+                <option value="" disabled>Select Category</option>
+                <option value="NOVEL">Novel</option>
+                <option value="POETRY">Poetry</option>
+                <option value="PLAY">Play</option>
+                <option value="MOVIE">Movie</option>
+                <option value="PAINTING">Painting</option>
+              </select>
               <div className="flex justify-end gap-2">
                 <button
                   className="bg-gray-400 text-white px-4 py-2 rounded"
