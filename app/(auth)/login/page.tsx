@@ -9,7 +9,7 @@ import { useState } from 'react';
 
 export default function LoginPage() {
   const router = useRouter();
-  const { setAccessToken, setUsername } = useAuth();
+  const { setAccessToken, setUsername, setUserId } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -18,6 +18,8 @@ export default function LoginPage() {
     mutationFn: loginUser,
     onSuccess: (data) => {
       setUsername(data.name);
+      setUserId(data.id);
+      localStorage.setItem('userId', data.id);
       localStorage.setItem('username', data.name);
       setAccessToken(data.token);
       router.replace('/');

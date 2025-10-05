@@ -9,6 +9,8 @@ type AuthContextType = {
   setAccessToken: (accessToken: string | null) => void;
   username: string | null;
   setUsername: (username: string | null) => void;
+  userId: string | null;
+  setUserId: (id: string | null) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -16,6 +18,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [username, setUsername] = useState<string | null>(null);
+  const [userId, setUserId] = useState<string | null>(null);
 
 
   useEffect(() => {
@@ -23,6 +26,7 @@ const AuthProvider = ({ children }: { children: ReactNode }) => {
       try {
         const { token: newToken } = await refreshAccessToken();
         setUsername(localStorage.getItem('username') || '');
+        setUserId(localStorage.getItem('userId') || '');
         setAccessToken(newToken);
         setStoredAccessToken(newToken);
       } catch (err: any) {
@@ -37,7 +41,7 @@ const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, [accessToken]);
   
   return (
-    <AuthContext.Provider value={{ accessToken, setAccessToken, username, setUsername }}>
+    <AuthContext.Provider value={{ accessToken, setAccessToken, username, setUsername, userId, setUserId }}>
       {children}
     </AuthContext.Provider>
   )
