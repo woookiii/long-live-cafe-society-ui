@@ -8,7 +8,6 @@ type ChatRoom = {
   roomId: string;
   roomName: string;
   category: string;
-  imageUrl: string;
   description: string;
 };
 
@@ -17,7 +16,6 @@ export default function GroupChattingList() {
   const [showCreateRoomModal, setShowCreateRoomModal] = useState(false);
   const [newRoomTitle, setNewRoomTitle] = useState("");
   const [newRoomDescription, setNewRoomDescription] = useState("");
-  const [newRoomImageUrl, setNewRoomImageUrl] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [newRoomCategory, setNewRoomCategory] = useState<string>("");
   const router = useRouter();
@@ -28,8 +26,8 @@ export default function GroupChattingList() {
   }, []);
 
   const loadChatRooms = async () => {
-    const response = await api.get(`${API_BASE_URL}/chat/room/group/list`);
-    setChatRoomList(response.data);
+    const res = await api.get(`${API_BASE_URL}/chat/room/group/list`);
+    setChatRoomList(res.data);
   };
 
   const joinChatRoom = async (roomId: string) => {
@@ -43,14 +41,12 @@ export default function GroupChattingList() {
       {
         roomName: newRoomTitle,
         description: newRoomDescription,
-        imageUrl: newRoomImageUrl,
         category: newRoomCategory,
       }
     );
     setShowCreateRoomModal(false);
     setNewRoomTitle("");
     setNewRoomDescription("");
-    setNewRoomImageUrl("");
     setNewRoomCategory("");
     loadChatRooms();
   };
@@ -103,12 +99,12 @@ export default function GroupChattingList() {
               {filteredChatRooms.map((chat) => (
                 <tr key={chat.roomId}>
                   <td className="py-2 px-4 border align-top">
-                    <div className="flex items-start">
-                      <img
-                        src={chat.imageUrl}
-                        alt={chat.roomName}
-                        className="w-12 h-12 rounded object-cover mr-4 mt-1"
-                      />
+                    <div className="flex items-start relative">
+                      {/* Category badge */}
+                      <span className="absolute top-0 right-0 bg-purple-100 text-purple-700 text-xs font-semibold px-2 py-0.5 rounded">
+                        {chat.category}
+                      </span>
+                      {/* todo image */}
                       <div className="flex flex-col min-w-0">
                         <span className="font-medium truncate max-w-xs block text-base">{chat.roomName}</span>
                         <span className="text-gray-500 text-sm truncate max-w-xs block mt-1">{chat.description}</span>
@@ -157,12 +153,6 @@ export default function GroupChattingList() {
                 value={newRoomDescription}
                 onChange={(e) => setNewRoomDescription(e.target.value)}
                 rows={3}
-              />
-              <input
-                className="w-full border rounded px-3 py-2 mb-4"
-                placeholder="Image URL"
-                value={newRoomImageUrl}
-                onChange={(e) => setNewRoomImageUrl(e.target.value)}
               />
               <select
                 className="w-full border rounded px-3 py-2 mb-4"

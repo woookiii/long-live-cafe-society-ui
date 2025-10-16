@@ -96,7 +96,7 @@ export default function ChatPage() {
               <div
                 key={idx}
                 className={`mb-2 ${
-                  msg.senderName === senderName ? "text-right" : "text-left"
+                  msg.senderId === senderId ? "text-right" : "text-left"
                 }`}
               >
                 <span className="font-semibold">{msg.senderName}: </span>
