@@ -19,25 +19,24 @@ export default function GroupChattingList() {
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [newRoomCategory, setNewRoomCategory] = useState<string>("");
   const router = useRouter();
-  const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
   useEffect(() => {
     loadChatRooms();
   }, []);
 
   const loadChatRooms = async () => {
-    const res = await api.get(`${API_BASE_URL}/chat/room/group/list`);
+    const res = await api.get(`/chat/room/group/list`);
     setChatRoomList(res.data);
   };
 
   const joinChatRoom = async (roomId: string) => {
-    await api.post(`${API_BASE_URL}/chat/room/group/${roomId}/join`);
+    await api.post(`/chat/room/group/${roomId}/join`);
     router.push(`/chatpage/${roomId}`);
   };
 
   const createChatRoom = async () => {
     await api.post(
-      `${API_BASE_URL}/chat/room/group/create`,
+      `/chat/room/group/create`,
       {
         roomName: newRoomTitle,
         description: newRoomDescription,

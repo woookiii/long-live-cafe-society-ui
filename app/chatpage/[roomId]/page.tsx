@@ -8,6 +8,7 @@ import { useParams } from "next/navigation";
 import api from "@/lib/axios";
 
 type Message = {
+  roomId: string;
   senderId: string;
   senderName: string;
   message: string;
@@ -19,16 +20,24 @@ export default function ChatPage() {
   const [newMessage, setNewMessage] = useState("");
   const [stompClient, setStompClient] = useState<StompClient | null>(null);
   const chatBoxRef = useRef<HTMLDivElement>(null);
-
-  const { accessToken: token, username: senderName, userId: senderId } = useAuth();
-  const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+  const { accessToken: token, username, userId } = useAuth();
 
   useEffect(() => {
-    if (!roomId) return;
-    const fetchHistory = async () => {
-      const res = await api.get(`${API_BASE_URL}/chat/history/${roomId}`);
-      setMessages(res.data);
-    };
+  if (!sessionStorage.getItem("chatpageRefreshed")) {
+    sessionStorage.setItem("chatpageRefreshed", "true");
+    window.location.reload();
+  }
+  }, []);
+  
+  useEffect(() => {
+  return () => {
+    sessionStorage.removeItem("chatpageRefreshed");
+  };
+  }, []);
+
+  useEffect(() => {
+    if (!roomId || !token) return;
+    
     fetchHistory();
     connectWebsocket();
 
@@ -43,10 +52,17 @@ export default function ChatPage() {
     }
   }, [messages]);
 
+  const fetchHistory = async () => {
+    const res = await api.get(`/chat/history/${roomId}`);
+    console.log("history fetching");
+    setMessages(res.data);
+  };
+
   const connectWebsocket = () => {
-    if (!token) return;
+    if (!token || !roomId) return;
     if (stompClient && stompClient.connected) return;
-    const sockJs = new SockJS(`${API_BASE_URL}/connect`);
+    const sockJs = new SockJS(`${process.env.NEXT_PUBLIC_API_URL}/connect`);
+
     const client = Stomp.over(sockJs);
     client.connect(
       { Authorization: `Bearer ${token}` },
@@ -65,10 +81,11 @@ export default function ChatPage() {
   };
 
   const sendMessage = () => {
-    if (!newMessage.trim() || !token || !senderId) return;
+    if (!newMessage.trim() || !token || !userId) return;
     const message = {
+      senderId: userId,
+      senderName: username,
       message: newMessage,
-      senderId,
     };
     if (stompClient) {
       stompClient.send(`/publish/${roomId}`, JSON.stringify(message));
@@ -96,7 +113,7 @@ export default function ChatPage() {
               <div
                 key={idx}
                 className={`mb-2 ${
-                  msg.senderId === senderId ? "text-right" : "text-left"
+                  msg.senderId === userId ? "text-right" : "text-left"
                 }`}
               >
                 <span className="font-semibold">{msg.senderName}: </span>
