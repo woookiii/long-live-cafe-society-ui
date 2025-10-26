@@ -7,8 +7,8 @@ import api from "@/lib/axios";
 type ChatRoom = {
   roomId: string;
   roomName: string;
-  category: string;
-  description: string;
+  roomCategory: string;
+  roomDescription: string;
 };
 
 export default function GroupChattingList() {
@@ -26,6 +26,7 @@ export default function GroupChattingList() {
 
   const loadChatRooms = async () => {
     const res = await api.get(`/chat/room/group/list`);
+    console.log(res.data);
     setChatRoomList(res.data);
   };
 
@@ -53,13 +54,13 @@ export default function GroupChattingList() {
   // Get unique categories from chatRoomList
   const categories = [
     "all",
-    ...Array.from(new Set(chatRoomList.map((room) => room.category)))
+    ...Array.from(new Set(chatRoomList.map((room) => room.roomCategory)))
   ];
 
   // Filtered chat rooms
   const filteredChatRooms = selectedCategory === "all"
     ? chatRoomList
-    : chatRoomList.filter((room) => room.category === selectedCategory);
+    : chatRoomList.filter((room) => room.roomCategory === selectedCategory);
 
   return (
     <div className="container mx-auto py-10">
@@ -101,12 +102,12 @@ export default function GroupChattingList() {
                     <div className="flex items-start relative">
                       {/* Category badge */}
                       <span className="absolute top-0 right-0 bg-purple-100 text-purple-700 text-xs font-semibold px-2 py-0.5 rounded">
-                        {chat.category}
+                        {chat.roomCategory}
                       </span>
                       {/* todo image */}
                       <div className="flex flex-col min-w-0">
                         <span className="font-medium truncate max-w-xs block text-base">{chat.roomName}</span>
-                        <span className="text-gray-500 text-sm truncate max-w-xs block mt-1">{chat.description}</span>
+                        <span className="text-gray-500 text-sm truncate max-w-xs block mt-1">{chat.roomDescription}</span>
                       </div>
                     </div>
                   </td>
