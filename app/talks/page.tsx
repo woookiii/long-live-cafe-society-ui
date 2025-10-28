@@ -1,12 +1,13 @@
 'use client'
 
 import { useEffect, useState } from "react";
+import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
 import api from "@/lib/axios";
 
 type ChatRoom = {
   roomId: string;
-  roomName: string;
+  roomName:string;
   roomCategory: string;
   roomDescription: string;
 };
@@ -18,16 +19,26 @@ export default function GroupChattingList() {
   const [newRoomDescription, setNewRoomDescription] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [newRoomCategory, setNewRoomCategory] = useState<string>("");
+  const { accessToken: token} = useAuth();
+  const [page, setPage] = useState(0);
   const router = useRouter();
 
   useEffect(() => {
-    loadChatRooms();
-  }, []);
+    if (!token) return;
+    loadChatRooms(page, selectedCategory);
+  }, [page, selectedCategory, token]);
 
-  const loadChatRooms = async () => {
-    const res = await api.get(`/chat/room/group/list`);
-    console.log(res.data);
-    setChatRoomList(res.data);
+  const loadChatRooms = async (page: number, category: string) => {
+    const endpoint = category === "all"
+      ? `/chat/room/group/list/${page}`
+      : `/chat/room/group/list/${category}/${page}`;
+    try {
+      const res = await api.get(endpoint);
+      setChatRoomList(res.data);
+    } catch (error) {
+      console.error("Failed to load chat rooms:", error);
+      setChatRoomList([]);
+    }
   };
 
   const joinChatRoom = async (roomId: string) => {
@@ -36,6 +47,7 @@ export default function GroupChattingList() {
   };
 
   const createChatRoom = async () => {
+    if (!newRoomTitle.trim() || !newRoomCategory) return;
     await api.post(
       `/chat/room/group/create`,
       {
@@ -48,19 +60,33 @@ export default function GroupChattingList() {
     setNewRoomTitle("");
     setNewRoomDescription("");
     setNewRoomCategory("");
-    loadChatRooms();
+    setPage(0); // Reset to first page to see the new room
+    setSelectedCategory("all"); // Reset category to see the new room
+    loadChatRooms(0, "all");
   };
 
   // Get unique categories from chatRoomList
   const categories = [
     "all",
-    ...Array.from(new Set(chatRoomList.map((room) => room.roomCategory)))
+    "NOVEL",
+    "POETRY",
+    "PLAY",
+    "MOVIE",
+    "PAINTING",
   ];
 
-  // Filtered chat rooms
-  const filteredChatRooms = selectedCategory === "all"
-    ? chatRoomList
-    : chatRoomList.filter((room) => room.roomCategory === selectedCategory);
+  const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setSelectedCategory(e.target.value);
+    setPage(0); // Reset to first page when category changes
+  };
+
+  const handlePreviousPage = () => {
+    setPage((prevPage) => Math.max(prevPage - 1, 0));
+  };
+
+  const handleNextPage = () => {
+    setPage((prevPage) => prevPage + 1);
+  };
 
   return (
     <div className="container mx-auto py-10">
@@ -80,7 +106,7 @@ export default function GroupChattingList() {
           <select
             className="border rounded px-2 py-1"
             value={selectedCategory}
-            onChange={(e) => setSelectedCategory(e.target.value)}
+            onChange={handleCategoryChange}
           >
             {categories.map((cat) => (
               <option key={cat} value={cat}>{cat}</option>
@@ -96,7 +122,7 @@ export default function GroupChattingList() {
               </tr>
             </thead>
             <tbody>
-              {filteredChatRooms.map((chat) => (
+              {chatRoomList.map((chat) => (
                 <tr key={chat.roomId}>
                   <td className="py-2 px-4 border align-top">
                     <div className="flex items-start relative">
@@ -121,7 +147,7 @@ export default function GroupChattingList() {
                   </td>
                 </tr>
               ))}
-              {filteredChatRooms.length === 0 && (
+              {chatRoomList.length === 0 && (
                 <tr>
                   <td colSpan={2} className="py-4 text-center text-gray-400">
                     No chat rooms found.
@@ -130,6 +156,26 @@ export default function GroupChattingList() {
               )}
             </tbody>
           </table>
+          {/* Pagination Controls */}
+          <div className="flex justify-center items-center mt-4">
+            <button
+              onClick={handlePreviousPage}
+              disabled={page === 0}
+              className="bg-gray-300 text-gray-700 px-4 py-2 rounded disabled:opacity-50"
+            >
+              Previous
+            </button>
+            <span className="px-4">
+              Page {page + 1}
+            </span>
+            <button
+              onClick={handleNextPage}
+              disabled={chatRoomList.length < 5}
+              className="bg-gray-300 text-gray-700 px-4 py-2 rounded disabled:opacity-50"
+            >
+              Next
+            </button>
+          </div>
         </div>
       </div>
 
@@ -143,7 +189,7 @@ export default function GroupChattingList() {
             <div className="p-6">
               <input
                 className="w-full border rounded px-3 py-2 mb-4"
-                placeholder="방제목"
+                placeholder="Room Title"
                 value={newRoomTitle}
                 onChange={(e) => setNewRoomTitle(e.target.value)}
               />
@@ -176,7 +222,7 @@ export default function GroupChattingList() {
                 <button
                   className="bg-blue-500 text-white px-4 py-2 rounded"
                   onClick={createChatRoom}
-                  disabled={!newRoomTitle.trim()}
+                  disabled={!newRoomTitle.trim() || !newRoomCategory}
                 >
                   create
                 </button>
