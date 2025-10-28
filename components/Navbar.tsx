@@ -9,13 +9,14 @@ import { logoutUser } from "@/api/auth";
 
 const Navbar = () => {
   const router = useRouter();
-  const { setAccessToken, username, setUsername } = useAuth();
+  const { setAccessToken, username, setUsername, setUserId } = useAuth();
 
   const handleLogout = async () => {
     try {
       await logoutUser();
       setAccessToken(null);
       setUsername('');
+      setUserId('');
       localStorage.clear();
       router.replace('/');
     } catch (err: any) {
