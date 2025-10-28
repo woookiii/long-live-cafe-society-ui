@@ -168,6 +168,12 @@ export default function ChatPage() {
     }
   };
 
+  const handleCloseModal = () => {
+    setShowImageModal(false);
+    setImageFile(null);
+    setImagePreview(null);
+  };
+
   return (
     <div className="flex justify-center items-start py-10 gap-8 px-8">
       {/* Left side: Image and Upload Button */}
@@ -191,7 +197,7 @@ export default function ChatPage() {
           className="w-full bg-green-500 text-white px-4 py-2 rounded-md"
           onClick={() => setShowImageModal(true)}
         >
-          Set Room Image
+          {chatRoomImageUrl ? "Change Image" : "Set Room Image"}
         </button>
       </div>
 
@@ -257,7 +263,7 @@ export default function ChatPage() {
               <div className="flex justify-end gap-2">
                 <button
                   className="bg-gray-400 text-white px-4 py-2 rounded"
-                  onClick={() => setShowImageModal(false)}
+                  onClick={handleCloseModal}
                   disabled={uploading}
                 >
                   Cancel
